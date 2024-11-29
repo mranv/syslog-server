@@ -1,111 +1,85 @@
 # SysLog Server
 
-A production-ready, multithreaded SysLog server implementation in Rust with support for metrics, monitoring, and CSV logging.
+A production-ready SysLog server implementation in Rust using the standard syslog crate. This server provides native syslog integration, metrics monitoring, and CSV logging capabilities.
 
 ## Features
 
-This SysLog server provides robust functionality for enterprise environments:
+The server implements comprehensive logging functionality:
 
-- Asynchronous processing using Tokio
+- Native syslog protocol support
+- Standard facility and severity level handling
 - Prometheus metrics integration
-- CSV logging with proper error handling
-- Configurable buffer sizes and ports
-- Production-grade logging with tracing
-- Cross-platform support
+- CSV logging with structured output
+- Asynchronous processing using Tokio
+- Production-grade monitoring
 
-## Quick Start
+## Installation
 
-### Prerequisites
-
-- Rust 1.70 or higher
-- Cargo package manager
-- Linux/Unix environment (for optimal performance)
-
-### Installation
-
-Clone the repository:
+Ensure you have Rust installed, then:
 
 ```bash
 git clone https://github.com/mranv/syslog-server.git
 cd syslog-server
-```
-
-Build the release version:
-
-```bash
 cargo build --release
 ```
 
-### Basic Usage
+## Usage
 
-Run the server with default settings:
+Start the server with default settings:
 
 ```bash
 ./target/release/syslog-server
 ```
 
-This will start the server with:
-- SysLog port: 514
-- Metrics port: 9000
-- Output file: syslog.csv
-
-### Custom Configuration
-
-Customize the server settings:
+Configure custom ports and output:
 
 ```bash
-./target/release/syslog-server --port 515 --output /var/log/custom.csv --metrics-port 9090
+./target/release/syslog-server --port 514 --output /var/log/syslog.csv --metrics-port 9000
 ```
 
-## Examples
+## Testing
 
-### Send Test Messages
+Send test messages using logger:
 
-Using logger (Linux):
 ```bash
-logger -n localhost -P 514 "Test syslog message"
+logger -p local0.info -t TestApp "Test message"
 ```
 
 Using netcat:
+
 ```bash
-echo "<13>MyApp: Test message" | nc -u localhost 514
+echo "<13>TestApp: Test message" | nc -u localhost 514
 ```
 
-### Monitor Metrics
+## Monitoring
 
 View Prometheus metrics:
+
 ```bash
 curl http://localhost:9000/metrics
 ```
 
-Example output:
+Example metrics output:
 ```
 # HELP syslog_received_total Total number of logs received
-# TYPE syslog_received_total counter
-syslog_received_total 150
+syslog_received_total 42
 
 # HELP syslog_written_total Total number of logs written
-# TYPE syslog_written_total counter
-syslog_written_total 150
-
-# HELP syslog_queue_size Current size of the log queue
-# TYPE syslog_queue_size gauge
-syslog_queue_size 0
+syslog_written_total 42
 ```
 
-### View Logs
+## Log Format
 
-The logs are stored in CSV format:
-```bash
-head -n 5 syslog.csv
-Event_Time,Device_IP,SysLog,Severity,Facility
-"2024-03-29 10:15:23.456","192.168.1.100","MyApp: System started",6,1
-"2024-03-29 10:15:24.789","192.168.1.101","DatabaseService: Connected",5,1
+The CSV output includes:
+
+```csv
+Event_Time,Device_IP,Message,Severity,Facility
+"2024-03-29 10:15:23.456","192.168.1.100","System started",INFO,LOCAL0
 ```
 
-## Production Deployment
+## Production Setup
 
-For production environments, consider using the provided systemd service:
+For production deployment, use the provided systemd service:
 
 ```ini
 [Unit]
@@ -115,7 +89,7 @@ After=network.target
 [Service]
 Type=simple
 User=syslog
-ExecStart=/usr/local/bin/syslog-server --port 514 --output /var/log/syslog.csv
+ExecStart=/usr/local/bin/syslog-server
 Restart=always
 LimitNOFILE=65535
 
@@ -123,18 +97,10 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-MIT License
-
 ## Author
 
 Anubhav Gain ([@mranv](https://github.com/mranv))
 
-## Support
+## License
 
-For support, please open an issue on the GitHub repository.
+MIT License
